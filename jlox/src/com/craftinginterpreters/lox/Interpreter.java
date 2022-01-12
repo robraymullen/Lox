@@ -164,10 +164,20 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 	@Override
 	public Void visitWhileStmt(Stmt.While stmt) {
 		while (isTruthy(evaluate(stmt.condition))) {
-			execute(stmt.body);
+			try {
+				execute(stmt.body);	
+			} catch (Jump jump) {
+				if (jump.type == JumpType.BREAK) break;
+			}
+			
 		}
 		
 		return null;
+	}
+	
+	@Override
+	public Void visitBreakStmt(Stmt.Break stmt) {
+		throw new Jump(JumpType.BREAK, stmt.name, "Expected 'break' only within loop.");
 	}
 	
 	@Override
