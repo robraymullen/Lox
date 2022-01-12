@@ -51,9 +51,16 @@ public class Parser {
 		if (match(IF)) return ifStatement();
 		if (match(PRINT)) return printStatement();
 		if (match(WHILE)) return whileStatement();
+		if (match(BREAK)) return breakStatement();
 		if (match(LEFT_BRACE)) return new Stmt.Block(block());
 		
 		return expressionStatement();
+	}
+	
+	private Stmt breakStatement() {
+		Token keyword = previous();
+		consume(SEMICOLON, "Expect ';' after break.");
+		return new Stmt.Break(keyword);
 	}
 	
 	private Stmt forStatement() {
@@ -324,7 +331,7 @@ public class Parser {
 			
 			switch (peek().type) {
 				case CLASS: case FOR: case FUN: case IF: case PRINT:
-				case RETURN: case VAR: case WHILE:
+				case RETURN: case VAR: case WHILE: case BREAK:
 					return;
 			}
 			
