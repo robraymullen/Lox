@@ -9,11 +9,15 @@ public class LoxFunction implements LoxCallable {
 	LoxFunction(Stmt.Function declaration) {
 		this.declaration = declaration;
 	}
+	
+	@Override
+	public String toString() {
+		return "<fn "+declaration.name.lexeme+">";
+	}
 
 	@Override
 	public int arity() {
-		// TODO Auto-generated method stub
-		return 0;
+		return declaration.params.size();
 	}
 
 	@Override
