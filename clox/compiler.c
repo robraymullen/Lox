@@ -223,7 +223,7 @@ static void parsePrecedence(Precedence precedence) {
 
     while (precedence <= getRule(parser.current.type)->precedence) {
         advance();
-        ParseFn infixRule = getRule(parser.current.type)->infix;
+        ParseFn infixRule = getRule(parser.previous.type)->infix;
         infixRule();
     }
 }
