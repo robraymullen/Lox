@@ -70,18 +70,25 @@ static void blackenObject(Obj* object) {
     printf("\n");
 #endif
     switch (object->type) {
+        case OBJ_BOUND_METHOD: {
+            ObjBoundMethod* bound = (ObjBoundMethod*)object;
+            markValue(bound->receiver);
+            markObject((Obj*)bound->method);
+            break;
+        }
         case OBJ_CLASS: {
             ObjClass* klass = (ObjClass*)object;
             markObject((Obj*)klass->name);
+            markTable(&klass->methods);
             break;
         }
         case OBJ_CLOSURE: {
-                ObjClosure* closure = (ObjClosure*)object;
-                markObject((Obj*)closure->function);
-                for(int i=0;i<closure->upvalueCount;i++) {
-                    markObject((Obj*)closure->upvalues[i]);
-                }
-                break;
+            ObjClosure* closure = (ObjClosure*)object;
+            markObject((Obj*)closure->function);
+            for(int i=0;i<closure->upvalueCount;i++) {
+                markObject((Obj*)closure->upvalues[i]);
+            }
+            break;
         }
         case OBJ_FUNCTION: {
             ObjFunction* function = (ObjFunction*)object;
@@ -109,7 +116,12 @@ static void freeObject(Obj* object) {
     printf("%p free type %d\n", (void*)object, object->type);
 #endif
     switch (object->type) {
+        case OBJ_BOUND_METHOD:
+            FREE(ObjBoundMethod, object);
+            break;
         case OBJ_CLASS: {
+            ObjClass* klass = (ObjClass*)object;
+            freeTable(&klass->methods);
             FREE(ObjClass, object);
             break;
         }
@@ -138,6 +150,7 @@ static void freeObject(Obj* object) {
             ObjString* string = (ObjString*)object;
             FREE_ARRAY(char, string->chars, string->length+1);
             FREE(ObjString, object);
+            break;
         }
         case OBJ_UPVALUE:
             FREE(ObjUpvalue, object);
